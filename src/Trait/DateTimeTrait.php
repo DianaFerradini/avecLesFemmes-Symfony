@@ -11,7 +11,7 @@ trait DateTimeTrait {
     #[ORM\Column(nullable: true)]
     private ?\DateTime $updateAt = null;
 
-    public function initDate() {
+    private function initDate() {
         $now = new \DateTimeImmutable();
         $this->createAt = $now;
         $this->updateAt = new \DateTime();
