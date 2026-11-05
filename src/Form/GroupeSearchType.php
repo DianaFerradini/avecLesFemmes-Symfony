@@ -39,7 +39,8 @@ class GroupeSearchType extends AbstractType
             ->add('submit', SubmitType::class, [
                 'label' => 'Filtrer',
                 'attr' => [
-                    'class' => 'bouton',
+                    // 'class' => 'bouton',
+                    'class' => 'btn btn-info',
                 ],
             ])
         ;
