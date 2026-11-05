@@ -15,7 +15,8 @@ class GroupementExerciceService
 {
     public function __construct(
         private readonly GroupementRepository $groupementRepository,
-        private readonly ExerciceRepository $exerciceRepository
+        private readonly ExerciceRepository $exerciceRepository,
+        private readonly PaginationService $paginationService
     ) {
     }
 
@@ -40,7 +41,7 @@ class GroupementExerciceService
         }, $groupements);
     }
 
-    public function findOneGroupementWithExercices(int $idGroupement, int $limit = 3, int $offset = 0): ?GroupementExerciceListDto
+    public function findOneGroupementWithExercices(int $idGroupement, int $page): ?GroupementExerciceListDto
     {
         $groupement = $this->groupementRepository->find($idGroupement);
         if (!$groupement) {
@@ -49,17 +50,27 @@ class GroupementExerciceService
         // SELECT * FROM EXERCICE WHERE groupement = $idGroupement ORDER BY statut DESC 
         // SELECT * FROM EXERCICE WHERE groupement = $idGroupement ORDER BY statut DESC LIMIT 0, 2
         // 0 = offset, 2 = limit
-        $exercices = $this->exerciceRepository->findBy(
-            ['groupement' => $idGroupement], 
-            ['statut' => 'DESC'],
-            $limit,
-            $offset
-            );
-        $exercicesDto = array_map(function ($exercice) {
-            return ExerciceDto::fromEntity($exercice);
-        }, $exercices);
+        // $exercices = $this->exerciceRepository->findBy(
+        //     ['groupement' => $idGroupement], 
+        //     ['statut' => 'DESC'],
+        //     $limit,
+        //     $offset
+        //     );
+        // $exercicesDto = array_map(function ($exercice) {
+        //     return ExerciceDto::fromEntity($exercice);
+        // }, $exercices);
         // $nbrExercices = $this->exerciceRepository->count(['groupement' => $idGroupement]);
         $nbrExercices = $this->exerciceRepository->countExercicesByGroupement($idGroupement);
-        return GroupementExerciceListDto::fromEntity($groupement, $exercicesDto, $nbrExercices);
+        $qb = $this->exerciceRepository->createQueryBuilder('e')
+            ->where('e.groupement = :groupement')
+            ->setParameter('groupement', $idGroupement)
+            ->orderBy('e.statut', 'DESC');
+        $page = $this->paginationService->paginate(
+            $qb, $page
+        );
+        $page->elements = array_map(function ($exercice) {
+            return ExerciceDto::fromEntity($exercice);
+        }, $page->elements);
+        return GroupementExerciceListDto::fromEntity($groupement, $page, $nbrExercices);
     }
 }

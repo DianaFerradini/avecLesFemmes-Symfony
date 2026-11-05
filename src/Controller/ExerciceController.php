@@ -24,29 +24,21 @@ final class ExerciceController extends AbstractController
         if ($page < 1) {
             $page = 1;
         }
-        $limit = 5;
-        $offset = ($page - 1) * $limit;
-        $groupementExerciceListDto = $this->groupementExerciceService->findOneGroupementWithExercices($idGroupement, $limit, $offset);
-        $nbrPages = ceil($groupementExerciceListDto->nbrExercices / $limit);
-        if ($page > $nbrPages && $nbrPages > 0) {
-            $page = $nbrPages;
-            $offset = ($page - 1) * $limit;
-            $groupementExerciceListDto = $this->groupementExerciceService->findOneGroupementWithExercices($idGroupement, $limit, $offset);
-        }
+        $groupementExerciceListDto = $this->groupementExerciceService->findOneGroupementWithExercices($idGroupement, $page);
+
+
         if ($groupementExerciceListDto === null) {
             // Rediriger vers la page de l'exercice
             return $this->redirectToRoute('app_groupement');
         }
         
-        if (count($groupementExerciceListDto->exercices) === 0) {
+        if (count($groupementExerciceListDto->page->elements) === 0) {
             // Rediriger vers la page de l'exercice
             return $this->redirectToRoute('app_nouveau_exercice');
         }
         return $this->render('exercice/index.html.twig', [
             'controller_name' => 'ExerciceController',
             'groupementExerciceListDto' => $groupementExerciceListDto,
-            'pageEnCours' => $page,
-            'nbrPages' => $nbrPages,
         ]);
     }
 

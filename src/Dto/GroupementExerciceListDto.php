@@ -3,6 +3,7 @@
 namespace App\Dto;
 
 use App\Entity\Groupement;
+use App\Dto\PageDto;
 
 final readonly class GroupementExerciceListDto
 {
@@ -12,19 +13,19 @@ final readonly class GroupementExerciceListDto
         public string $nom,
         public string $tel,
         public ?string $adresse,
-        public array $exercices,
+        public PageDto $page,
         public int $nbrExercices = 0
     ) {
     }
 
-    public static function fromEntity(Groupement $groupementEntity, array $exercices, int $nbrExercices): self
+    public static function fromEntity(Groupement $groupementEntity, PageDto $page, int $nbrExercices): self
     {
         return new self(
             $groupementEntity->getId(),
             $groupementEntity->getNom(),
             $groupementEntity->getTel(),
             $groupementEntity->getAdresse(),
-            $exercices,
+            $page,
             $nbrExercices
         );
     }

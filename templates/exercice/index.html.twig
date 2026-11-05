@@ -34,7 +34,7 @@
         <section class="panneau" aria-labelledby="titre-exercice">
             <div class="entete-panneau">
                 <div>
-                    {% set exercice = groupementExerciceListDto.exercices[0] %}
+                    {% set exercice = groupementExerciceListDto.page.elements[0] %}
                     <h2 id="titre-exercice">Exercice en cours</h2>
                     <p class="sous-titre"></p>
                 </div>
@@ -76,8 +76,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% if groupementExerciceListDto.exercices|length >= 1 %}
-                            {% for exercice in groupementExerciceListDto.exercices|slice(1) %}
+                        {% if groupementExerciceListDto.page.elements|length >= 1 %}
+                            {% for exercice in groupementExerciceListDto.page.elements|slice(1) %}
                                 <tr>
                                     <td>{{ exercice.dateDebut }} – {{ exercice.dateFin }}</td>
                                     <td><span class="statut statut--{{ exercice.statut|lower }}">{{ exercice.statut }}</span></td>
@@ -91,22 +91,24 @@
                         {% endif %}
                     </tbody>
                 </table>
+                {# // à externaliser et inclure si besoin #}
                 <nav class="pagination" aria-label="Pagination de l’historique">
                     {% set route = app.request.attributes.get('_route') %}
                     {% set params = app.request.attributes.get('_route_params') %}
-                    {% if pageEnCours > 1 %}
-                        <a class="pagination__lien" rel="prev" href="{{ path(route, params|merge({'page': pageEnCours - 1})) }}">Précédent</a>
+                    {% set paginate = groupementExerciceListDto.page %}
+                    {% if paginate.precedent() %}
+                        <a class="pagination__lien" rel="prev" href="{{ path(route, params|merge({'page': paginate.pageEnCours - 1})) }}">Précédent</a>
                     {% endif %}
 
                     {# pagination__lien--actif #}
                   
-                    {% for page in 1..nbrPages %}
+                    {% for page in 1..paginate.nbrPages %}
                 
-                        <a class="pagination__lien {{ page == pageEnCours ? 'pagination__lien--actif' : '' }}" href="{{ path(route, params|merge({'page': page})) }}">{{ page }}</a>
+                        <a class="pagination__lien {{ page == paginate.pageEnCours ? 'pagination__lien--actif' : '' }}" href="{{ path(route, params|merge({'page': page})) }}">{{ page }}</a>
 
                     {% endfor %}
-                    {% if pageEnCours < nbrPages %}
-                        <a class="pagination__lien" rel="next" href="{{ path(route, params|merge({'page': pageEnCours + 1})) }}">Suivant</a>
+                    {% if paginate.suivant() %}
+                        <a class="pagination__lien" rel="next" href="{{ path(route, params|merge({'page': paginate.pageEnCours + 1})) }}">Suivant</a>
                     {% endif %}
                 </nav>
             </div>
