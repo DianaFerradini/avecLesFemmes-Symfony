@@ -13,10 +13,11 @@ final readonly class GroupementExerciceListDto
         public string $tel,
         public ?string $adresse,
         public array $exercices,
+        public int $nbrExercices = 0
     ) {
     }
 
-    public static function fromEntity(Groupement $groupementEntity, array $exercices): self
+    public static function fromEntity(Groupement $groupementEntity, array $exercices, int $nbrExercices): self
     {
         return new self(
             $groupementEntity->getId(),
@@ -24,6 +25,7 @@ final readonly class GroupementExerciceListDto
             $groupementEntity->getTel(),
             $groupementEntity->getAdresse(),
             $exercices,
+            $nbrExercices
         );
     }
 }

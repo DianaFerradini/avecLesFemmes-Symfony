@@ -28,18 +28,31 @@ class ExerciceFixtures extends Fixture implements DependentFixtureInterface
     public function load(ObjectManager $manager): void
     {
         $groupements = $this->repo->findAll();
+        $compteur = 10;
         foreach ($groupements as $key => $groupement) {
+            $annee = 2026;
             $exercice = (new Exercice())
                         ->setGroupement($groupement)
-                        ->setDebutAt(new \DateTime('2026-01-01'))
-                        ->setFinAt(new \DateTime('2026-12-31'))
-                        ->setLimitePretsAt(new \DateTime('2026-10-01'))
-                        ->setRetributionAt(new \DateTime('2026-11-01'))
+                        ->setDebutAt(new \DateTime("$annee-01-01"))
+                        ->setFinAt(new \DateTime("$annee-12-31"))
+                        ->setLimitePretsAt(new \DateTime("$annee-11-10"))
+                        ->setRetributionAt(new \DateTime("$annee-11-30"))
                         ->setStatut(StatutExercice::ENCOURS);
             $manager->persist($exercice);
+            for ($i = 0; $i < $compteur; $i++) {
+                $annee--;
+                $exercice = (new Exercice())
+                    ->setGroupement($groupement)
+                    ->setDebutAt(new \DateTime(($annee)."-01-01"))
+                    ->setFinAt(new \DateTime(($annee)."-12-31"))
+                    ->setLimitePretsAt(new \DateTime(($annee)."-11-10"))
+                    ->setRetributionAt(new \DateTime(($annee)."-11-30"))
+                    ->setStatut(StatutExercice::CLOTURE);
+                $manager->persist($exercice);
+            }
+            $compteur -= 3;
+            
         }
-        // $product = new Product();
-        // $manager->persist($product);
 
         $manager->flush();
     }

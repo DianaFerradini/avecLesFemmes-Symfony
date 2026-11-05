@@ -5,9 +5,13 @@ namespace App\DataFixtures;
 use App\Entity\Groupement;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use App\Repository\GroupementRepository;
 
 class GroupementFixtures extends Fixture
 {
+    public function __construct(private readonly GroupementRepository $repo) {
+        
+    }
     public function load(ObjectManager $manager): void
     {
         $data = [
@@ -23,12 +27,12 @@ class GroupementFixtures extends Fixture
                         ->setNom($nom)
                         ->setTel($tel)
                         ->setAdresse($adresse);
-            $manager->persist($groupement);
+            $this->repo->save($groupement, true);
             // $manager->flush();
         }
         // $product = new Product();
         // $manager->persist($product);
 
-        $manager->flush();
+        // $manager->flush();
     }
 }

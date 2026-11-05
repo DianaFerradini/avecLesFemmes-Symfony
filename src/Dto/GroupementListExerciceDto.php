@@ -13,6 +13,7 @@ final readonly class GroupementListExerciceDto
         public string $tel,
         public ?string $adresse,
         public ExerciceEncoursDto $exerciceEncoursDto,
+        public int $nbrExercices = 0
     ) {
     }
 
@@ -24,6 +25,7 @@ final readonly class GroupementListExerciceDto
             $groupementEntity->getTel(),
             $groupementEntity->getAdresse(),
             $exerciceEncoursDto,
+            $groupementEntity->getExercices()->count()
         );
     }
 }

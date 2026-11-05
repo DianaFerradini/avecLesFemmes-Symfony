@@ -42,8 +42,10 @@ class GroupementRepository extends ServiceEntityRepository
             ->leftJoin('g.exercices', 'e')
             ->addSelect('e')
             ->where('e.statut = :statut')
-            ->setParameter('statut', 'en_cours');
-
+            ->setParameter('statut', 'en_cours')
+            ;
+            
+        
         if ($searchDto->query) {
             $qb->andWhere('g.nom LIKE :query OR g.adresse LIKE :query')
                 ->setParameter('query', '%' . $searchDto->query . '%');

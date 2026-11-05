@@ -2,6 +2,11 @@
 
 {% block title %}Exercice{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+        <link rel="stylesheet" href="{{ asset('css/pagination.css') }}">
+{% endblock %}
+
 {% block body %}
     <main class="contenu">
         <a class="retour" href="#liste">Tous les groupements</a>
@@ -39,20 +44,20 @@
             <ol class="frise">
                 <li class="etape etape--passee">
                     <span class="etape__nom">Début</span>
-                    <span class="etape__date">{{ exercice.dateDebut|format_date("long") }}</span>
+                    <span class="etape__date">{{ exercice.dateDebut }}</span>
                 </li>
                 <li class="etape etape--prochaine">
                     <span class="etape__nom">Date limite des prêts</span>
-                    <span class="etape__date">30 novembre 2026</span>
-                    <span class="etape__note">Encore 34 jours pour prêter</span>
+                    <span class="etape__date">{{ exercice.limitePretsAt }}</span>
+                    <span class="etape__note">Encore {{ exercice.nbrJoursRestant }} jours pour prêter</span>
                 </li>
                 <li class="etape">
                     <span class="etape__nom">Fin</span>
-                    <span class="etape__date">{{ exercice.dateFin|format_date("long") }}</span>
+                    <span class="etape__date">{{ exercice.dateFin }}</span>
                 </li>
                 <li class="etape">
                     <span class="etape__nom">Rétribution</span>
-                    <span class="etape__date">14 mars 2027</span>
+                    <span class="etape__date">{{ exercice.retributionAt }}</span>
                 </li>
             </ol>
         </section>
@@ -71,23 +76,39 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1er mars 2026 – 28 février 2027</td>
-                            <td><span class="statut statut--en_cours">En cours</span></td>
-                            <td>Prévue le 14 mars 2027</td>
-                        </tr>
-                        <tr>
-                            <td>1er mars 2025 – 28 février 2026</td>
-                            <td><span class="statut statut--cloture">Clôturé</span></td>
-                            <td>14 mars 2026</td>
-                        </tr>
-                        <tr>
-                            <td>4 mars 2024 – 28 février 2025</td>
-                            <td><span class="statut statut--cloture">Clôturé</span></td>
-                            <td>15 mars 2025</td>
-                        </tr>
+                        {% if groupementExerciceListDto.exercices|length >= 1 %}
+                            {% for exercice in groupementExerciceListDto.exercices|slice(1) %}
+                                <tr>
+                                    <td>{{ exercice.dateDebut }} – {{ exercice.dateFin }}</td>
+                                    <td><span class="statut statut--{{ exercice.statut|lower }}">{{ exercice.statut }}</span></td>
+                                    <td>{{ exercice.retributionAt }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3">Aucun exercice historique</td>
+                            </tr>
+                        {% endif %}
                     </tbody>
                 </table>
+                <nav class="pagination" aria-label="Pagination de l’historique">
+                    {% set route = app.request.attributes.get('_route') %}
+                    {% set params = app.request.attributes.get('_route_params') %}
+                    {% if pageEnCours > 1 %}
+                        <a class="pagination__lien" rel="prev" href="{{ path(route, params|merge({'page': pageEnCours - 1})) }}">Précédent</a>
+                    {% endif %}
+
+                    {# pagination__lien--actif #}
+                  
+                    {% for page in 1..nbrPages %}
+                
+                        <a class="pagination__lien {{ page == pageEnCours ? 'pagination__lien--actif' : '' }}" href="{{ path(route, params|merge({'page': page})) }}">{{ page }}</a>
+
+                    {% endfor %}
+                    {% if pageEnCours < nbrPages %}
+                        <a class="pagination__lien" rel="next" href="{{ path(route, params|merge({'page': pageEnCours + 1})) }}">Suivant</a>
+                    {% endif %}
+                </nav>
             </div>
         </section>
     </main>
