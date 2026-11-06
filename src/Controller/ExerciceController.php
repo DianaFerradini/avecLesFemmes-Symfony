@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Service\GroupementExerciceService;
+use Symfony\Component\HttpFoundation\Request;
 
 final class ExerciceController extends AbstractController
 {
@@ -17,15 +18,21 @@ final class ExerciceController extends AbstractController
     // d : indique que l'ID doit être un chiffre (0-9)
     // + : indique que l'ID doit contenir au moins un chiffre
     #[Route('{idGroupement}/exercice', name: 'app_exercice', requirements: ['idGroupement' => '\d+'])]
-    public function index(int $idGroupement): Response
+    public function index(int $idGroupement, Request $request): Response
     {
-        $groupementExerciceListDto = $this->groupementExerciceService->findOneGroupementWithExercices($idGroupement);
+        $page = (int) $request->query->get('page', 1);
+        if ($page < 1) {
+            $page = 1;
+        }
+        $groupementExerciceListDto = $this->groupementExerciceService->findOneGroupementWithExercices($idGroupement, $page);
+
+
         if ($groupementExerciceListDto === null) {
             // Rediriger vers la page de l'exercice
             return $this->redirectToRoute('app_groupement');
         }
         
-        if (count($groupementExerciceListDto->exercices) === 0) {
+        if (count($groupementExerciceListDto->page->elements) === 0) {
             // Rediriger vers la page de l'exercice
             return $this->redirectToRoute('app_nouveau_exercice');
         }

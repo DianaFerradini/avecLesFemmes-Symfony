@@ -15,7 +15,8 @@ class GroupementExerciceService
 {
     public function __construct(
         private readonly GroupementRepository $groupementRepository,
-        private readonly ExerciceRepository $exerciceRepository
+        private readonly ExerciceRepository $exerciceRepository,
+        private readonly PaginationService $paginationService
     ) {
     }
 
@@ -23,9 +24,8 @@ class GroupementExerciceService
     public function findAllGroupementsAndExercicesEncours(GroupeSearchDto $searchDto): array
     {
         // TODO : find all groupement and exercices encours and convert them to GroupementListExerciceDto
-        //$groupements = $this->groupementRepository->findAll();
+        // $groupements = $this->groupementRepository->findAll();
         $groupements = $this->groupementRepository->findAllGroupementsAndExercicesEncours($searchDto);
-        
         // MAPPING : convert groupement and exercices encours to GroupementListExerciceDto
         return array_map(function ($groupement) {
             // $exerciceEncours = $groupement->getExercices()->filter(function ($exercice) {
@@ -41,16 +41,36 @@ class GroupementExerciceService
         }, $groupements);
     }
 
-    public function findOneGroupementWithExercices(int $idGroupement): ?GroupementExerciceListDto
+    public function findOneGroupementWithExercices(int $idGroupement, int $page): ?GroupementExerciceListDto
     {
         $groupement = $this->groupementRepository->find($idGroupement);
         if (!$groupement) {
             return null;
         }
-        $exercices = $this->exerciceRepository->findBy(['groupement' => $idGroupement], ['statut' => 'DESC']);
-        $exercicesDto = array_map(function ($exercice) {
+        // SELECT * FROM EXERCICE WHERE groupement = $idGroupement ORDER BY statut DESC 
+        // SELECT * FROM EXERCICE WHERE groupement = $idGroupement ORDER BY statut DESC LIMIT 0, 2
+        // 0 = offset, 2 = limit
+        // $exercices = $this->exerciceRepository->findBy(
+        //     ['groupement' => $idGroupement], 
+        //     ['statut' => 'DESC'],
+        //     $limit,
+        //     $offset
+        //     );
+        // $exercicesDto = array_map(function ($exercice) {
+        //     return ExerciceDto::fromEntity($exercice);
+        // }, $exercices);
+        // $nbrExercices = $this->exerciceRepository->count(['groupement' => $idGroupement]);
+        $nbrExercices = $this->exerciceRepository->countExercicesByGroupement($idGroupement);
+        $qb = $this->exerciceRepository->createQueryBuilder('e')
+            ->where('e.groupement = :groupement')
+            ->setParameter('groupement', $idGroupement)
+            ->orderBy('e.statut', 'DESC');
+        $page = $this->paginationService->paginate(
+            $qb, $page
+        );
+        $page->elements = array_map(function ($exercice) {
             return ExerciceDto::fromEntity($exercice);
-        }, $exercices);
-        return GroupementExerciceListDto::fromEntity($groupement, $exercicesDto);
+        }, $page->elements);
+        return GroupementExerciceListDto::fromEntity($groupement, $page, $nbrExercices);
     }
 }

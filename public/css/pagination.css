@@ -1,0 +1,25 @@
+.pagination {
+    display: flex;
+    gap: .5rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.pagination__lien {
+    padding: .4rem .8rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.pagination__lien--actif {
+    background: #333;
+    color: #fff;
+    border-color: #333;
+}
+
+.pagination__lien--desactive {
+    opacity: .5;
+    pointer-events: none;
+}

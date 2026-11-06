@@ -26,7 +26,6 @@ final class GroupementController extends AbstractController
         $form = $this->createForm(GroupeSearchType::class, $searchDto);
         $form->handleRequest($request);
         $groupements = $this->groupementExerciceService->findAllGroupementsAndExercicesEncours($searchDto);
-        
         return $this->render('groupement/index.html.twig', [
             'controller_name' => 'GroupementController',
             'dataGroupements' => $groupements,

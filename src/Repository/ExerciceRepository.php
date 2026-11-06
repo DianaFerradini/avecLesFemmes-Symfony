@@ -16,6 +16,34 @@ class ExerciceRepository extends ServiceEntityRepository
         parent::__construct($registry, Exercice::class);
     }
 
+    public function save(Exercice $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(Exercice $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function countExercicesByGroupement(int $idGroupement): int
+    {
+        // SELECT COUNT(e.id) FROM exercice e WHERE e.groupement_id = :idGroupement
+        $qb = $this->createQueryBuilder('e')
+            ->select('COUNT(e.id)')
+            ->where('e.groupement = :idGroupement')
+            ->setParameter('idGroupement', $idGroupement);
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
 //    /**
 //     * @return Exercice[] Returns an array of Exercice objects
 //     */
